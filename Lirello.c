@@ -40,6 +40,15 @@ scanf("%s",add->name);
 printf("CONTENT:");
 scanf("%s",add->content);
 }
+void show_block(TASK_BLOCK arr[30],int size){
+
+for(int i=0;i<size;i++){
+printf("--------------------------------\n");
+printf("|%30s|\n",arr[i].title);
+printf("|------------------------------|\n");
+
+}
+}
 void delete_block(){}
 void Register(){}           //Register 
 void Login(){}              //Login
