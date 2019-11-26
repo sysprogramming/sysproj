@@ -3,7 +3,7 @@
 #include<fcntl.h>
 #include<string.h>
 #include<stdlib.h>
-#include<Windows.h>
+#include<unistd.h>
 #define TL 51      //title length
 #define CL 201     //Content string length
 #define RL 41     //Reply length
@@ -43,9 +43,9 @@ typedef struct PROJECT {
 	TASK_BLOCK ARR[3][30];
 	USERINFO USERARR[30];
 
-	int DOSIZE;
-	int DOINGSIZE;
-	int DONESIZE;
+	int SIZE[3];
+	
+	
 }PROJECT;
 
 
