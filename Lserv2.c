@@ -23,16 +23,16 @@
 #define PORTNUM 13000
 #define HOSTLEN 256
 #define oops(msg) {perror(msg);exit(1);}
-void clrscr(FILE* sockfp)
+void clrscr(void)
 {
-	fprintf(sockfp, "\033[1;1H\033[2J");
+	write(1, "\033[1;1H\033[2J", 10);
 }
 
 int PROJnum = 0;
 
-void gotoxy(int x, int y,FILE* sockfp)
+void gotoxy(int x, int y, FILE* sockfp)
 {
-	fprintf(sockfp,"%c[%d;%df", 0x1B, y, x);
+	fprintf(sockfp, "%c[%d;%df", 0x1B, y, x);
 }
 
 
@@ -57,54 +57,49 @@ typedef struct PROJECT {
 
 
 }PROJECT;
-PROJECT a[5] = { 0 };
+PROJECT PROJ[5] = { 0 };
 
-int add_block(TASK_BLOCK* add){
-	printf("TITLE NAME(max 50 chars):");
-	fgets(add->title, TL, stdin);
-	add->title[strlen(add->title) - 1] = '\0';
-	printf("CONTENT(max 200 chars)  :");
-
-	fgets(add->content, CL, stdin);
-	add->content[strlen(add->content) - 1] = '\0';
+int add_block(TASK_BLOCK* add,char *title,char* content) {
+	strcpy(add->title, title);
+	strcpy(add->content, content);
 }
 void delete_block(TASK_BLOCK arr[30], int index, int size) {
 	for (int i = index; i < size - 1; i++) {
 		arr[i] = arr[i + 1];
 	}
 }
-void show_block(TASK_BLOCK arr[30], int size, int printindex,FILE* sockfp) {
+void show_block(TASK_BLOCK arr[30], int size, int printindex, FILE* sockfp) {
 	int length = 0;
 	int yindex = 5;
 	for (int i = 0; i < size; i++) {
 		length = strlen(arr[i].content);
-		gotoxy((printindex - 1) * 37, yindex++,sockfp);
-		fprintf(sockfp," %d %d--------------------------- ", printindex, i + 1);
-		gotoxy((printindex - 1) * 37, yindex++,sockfp);
-		fprintf(sockfp,"|%-30s|", arr[i].title);
-		gotoxy((printindex - 1) * 37, yindex++,sockfp);
-		fprintf(sockfp,"|------------------------------|");
+		gotoxy((printindex - 1) * 37, yindex++, sockfp);
+		fprintf(sockfp, " %d %d--------------------------- ", printindex, i + 1);
+		gotoxy((printindex - 1) * 37, yindex++, sockfp);
+		fprintf(sockfp, "|%-30s|", arr[i].title);
+		gotoxy((printindex - 1) * 37, yindex++, sockfp);
+		fprintf(sockfp, "|------------------------------|");
 		for (int j = 0; j <= length / 30; j++) {
-			gotoxy((printindex - 1) * 37, yindex++,sockfp);
-			fprintf(sockfp,"|");
+			gotoxy((printindex - 1) * 37, yindex++, sockfp);
+			fprintf(sockfp, "|");
 			for (int k = 0; k < 30; k++) {
-			if (arr[i].content[j * 30 + k] >= 33)
-					fprintf(sockfp,"%c", arr[i].content[j * 30 + k]);
+				if (arr[i].content[j * 30 + k] >= 33)
+					fprintf(sockfp, "%c", arr[i].content[j * 30 + k]);
 				else
-					fprintf(sockfp," ");
+					fprintf(sockfp, " ");
 			}
-			fprintf(sockfp,"|");
+			fprintf(sockfp, "|");
 		}
-		gotoxy((printindex - 1) * 37, yindex++,sockfp);
-		fprintf(sockfp,"|------------------------------|");
+		gotoxy((printindex - 1) * 37, yindex++, sockfp);
+		fprintf(sockfp, "|------------------------------|");
 
 		for (int j = 0; strlen(arr[i].reply[j]) != 0; j++) {
-			gotoxy((printindex - 1) * 37, yindex++,sockfp);
-			fprintf(sockfp,"|%-30s|\n", arr[i].reply[j]);
+			gotoxy((printindex - 1) * 37, yindex++, sockfp);
+			fprintf(sockfp, "|%-30s|\n", arr[i].reply[j]);
 		}
-		gotoxy((printindex - 1) * 37, yindex++,sockfp);
+		gotoxy((printindex - 1) * 37, yindex++, sockfp);
 		if (strlen(arr[i].reply[0]) != 0)
-			fprintf(sockfp," ------------------------------ ");
+			fprintf(sockfp, " ------------------------------ ");
 		yindex++;
 
 	}
@@ -128,11 +123,14 @@ int main(int ac, char* av[]) {
 	struct sockaddr_in saddr;
 	struct hostent* hp;
 	char hostname[HOSTLEN];
+	char op;
 	int sock_id, sock_fd;
 	FILE* sock_fp;
 	char* ctime();
 	time_t thetime;
-
+	int x, y;
+	char title[TL];
+	char content[CL];
 	sock_id = socket(PF_INET, SOCK_STREAM, 0);
 	if (sock_id == -1)
 		oops("socket");
@@ -150,18 +148,36 @@ int main(int ac, char* av[]) {
 	if (listen(sock_id, 1) != 0)
 		oops("listen");
 
-	while (1) {
-		sock_fd = accept(sock_id, NULL, NULL);
-		printf("Wow!got a call\n");
-		if (sock_fd == -1)
-			oops("accept");
-		sock_fp = fdopen(sock_fd, "w");
-		add_block(&a[0].ARR[0][0]);
-		if (sock_fp == NULL)
-			oops("fdopen");
-clrscr(sock_fp);
-		show_block(a[0].ARR[0], 1, DOI, sock_fp);
-fclose(sock_fp);
-	}
 
+	sock_fd = accept(sock_id, NULL, NULL);
+	printf("Wow!got a call\n");
+	if (sock_fd == -1)
+		oops("accept");
+	sock_fp = fdopen(sock_fd, "rw");
+	if (sock_fp == NULL)
+		oops("fdopen");
+	while (1){
+		printf("get a command\n");
+		fscanf(sock_fp, "%c %d %d %s %s", &op, &x, &y,title,content);
+
+		if (op=='a') {
+			add_block(&PROJ[0].ARR[0][PROJ[0].SIZE[0]++],title,content);
+		}
+		else if (op=='d') {
+				delete_block(PROJ[0].ARR[x - 1], y - 1, PROJ[0].SIZE[x - 1]--);
+		}
+		else if (op=='m') {
+				move_BLOCK(PROJ[0].ARR[x - 1], PROJ[0].ARR[x], y - 1, PROJ[0].SIZE[x - 1]--, PROJ[0].SIZE[x]++);
+		}
+		else if (op=='q') {
+			clrscr();
+			break;
+		}
+		printf("show block to client\n");
+		show_block(PROJ[0].ARR[0], PROJ[0].SIZE[0], DOI, sock_fp);
+		show_block(PROJ[0].ARR[0], PROJ[0].SIZE[1], DOINGI, sock_fp);
+		show_block(PROJ[0].ARR[0], PROJ[0].SIZE[2], DONEI, sock_fp);
 }
+		fclose(sock_fp);
+}
+
