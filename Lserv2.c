@@ -69,6 +69,8 @@ void delete_block(TASK_BLOCK arr[30], int index, int size) {
 	}
 }
 void show_block(TASK_BLOCK arr[30], int size, int printindex, FILE* sockfp) {
+	printf("show_block start\n");
+	printf("arr[0]:%s %s\n", arr[0].title, arr[0].content);
 	int length = 0;
 	int yindex = 5;
 	for (int i = 0; i < size; i++) {
@@ -123,9 +125,9 @@ int main(int ac, char* av[]) {
 	struct sockaddr_in saddr;
 	struct hostent* hp;
 	char hostname[HOSTLEN];
-	char op;
+	char op[BUFSIZ];
 	int sock_id, sock_fd;
-	FILE* sock_fp;
+	FILE* sock_fpo;
 	char* ctime();
 	time_t thetime;
 	int x, y;
@@ -153,31 +155,45 @@ int main(int ac, char* av[]) {
 	printf("Wow!got a call\n");
 	if (sock_fd == -1)
 		oops("accept");
-	sock_fp = fdopen(sock_fd, "rw");
-	if (sock_fp == NULL)
+	sock_fpo = fdopen(sock_fd, "w");
+	if (sock_fpo == NULL)
 		oops("fdopen");
+	
 	while (1){
+		
+		
 		printf("get a command\n");
-		fscanf(sock_fp, "%c %d %d %s %s", &op, &x, &y,title,content);
-
-		if (op=='a') {
+		read(sock_fd, op, 5);
+		printf("get command complete\n");
+		if (op[0]=='a') {
+			printf("operation is a\n");
+			read(sock_fd, title, TL);
+			printf("title is %s\n", title);
+			read(sock_fd, content, CL);
+			printf("content is %s\n", content);
 			add_block(&PROJ[0].ARR[0][PROJ[0].SIZE[0]++],title,content);
 		}
-		else if (op=='d') {
+		else if (op[0]=='d') {
+			x = op[2] - '0';
+			y = op[2] - '0';
 				delete_block(PROJ[0].ARR[x - 1], y - 1, PROJ[0].SIZE[x - 1]--);
 		}
-		else if (op=='m') {
+		else if (op[0]=='m') {
+			x = op[2] - '0';
+			y = op[4] - '0';
 				move_BLOCK(PROJ[0].ARR[x - 1], PROJ[0].ARR[x], y - 1, PROJ[0].SIZE[x - 1]--, PROJ[0].SIZE[x]++);
 		}
-		else if (op=='q') {
+		else if (op[0]=='q') {
 			clrscr();
 			break;
 		}
 		printf("show block to client\n");
-		show_block(PROJ[0].ARR[0], PROJ[0].SIZE[0], DOI, sock_fp);
-		show_block(PROJ[0].ARR[0], PROJ[0].SIZE[1], DOINGI, sock_fp);
-		show_block(PROJ[0].ARR[0], PROJ[0].SIZE[2], DONEI, sock_fp);
+		show_block(PROJ[0].ARR[0], PROJ[0].SIZE[0], DOI, sock_fpo);
+		show_block(PROJ[0].ARR[1], PROJ[0].SIZE[1], DOINGI, sock_fpo);
+		show_block(PROJ[0].ARR[2], PROJ[0].SIZE[2], DONEI, sock_fpo);
+		fflush(sock_fpo);
 }
-		fclose(sock_fp);
+	fclose(sock_fpo);
+
 }
 

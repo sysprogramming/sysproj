@@ -27,10 +27,10 @@ int main(int ac, char* av[]) {
 	int messlen;
 	char op[BUFSIZ];
 	int x, y;
-	FILE* sock_fp;
+	FILE* sock_fpi;
+	FILE* sock_fpo;
 	char title[TL];
 	char content[CL];
-	while (1) {
 		sock_id = socket(AF_INET, SOCK_STREAM, 0);
 		if (sock_id == -1)
 			oops("socket");
@@ -45,7 +45,6 @@ int main(int ac, char* av[]) {
 
 		if (connect(sock_id, (struct sockaddr*) & servadd, sizeof(struct sockaddr)) != 0)
 			oops("connect");
-		sock_fp = fdopen(sock_id, "rw");
 		clrscr();
 		while (1) {
 			gotoxy(MENUI, 10);
@@ -56,40 +55,46 @@ int main(int ac, char* av[]) {
 				gotoxy(MENUI, 12);
 				printf("TITLE:");
 				fgets(title, TL, stdin);
-				title[strlen(title) - 1] = '\0';
 				gotoxy(MENUI, 13);
 				printf("CONTENT:");
 				fgets(content, CL, stdin);
+				title[strlen(title) - 1] = '\0';
 				content[strlen(content) - 1] = '\0';
-				fprintf(sock_fp, "a 0 0 %s %s", title, content);
+				write(sock_id, "a",5);
+				sleep(1);
+				write(sock_id, title, TL);
+				sleep(1);
+				write(sock_id, content, CL);
+			
 			}
 			else if (strcmp(op, "d\n") == 0) {
 				gotoxy(MENUI, 11);
 				printf("Type the position you want to delete(x y):");
 				scanf("%d %d", &x, &y);
-				if (x > 3 || x < 1)
-					fprintf(sock_fp, "d 0 0 title content");
-				else
-					fprintf(sock_fp, "d %d %d title content", x, y);
+				
+				if (x > 3 || x < 1) 
+					write(sock_id, "d", 5);
+				else {
+					sprintf(op, "d %d %d", x, y);
+					write(sock_id,op,strlen(op));
+				}
 			}
 			else if (strcmp(op, "m\n") == 0) {
 				gotoxy(MENUI, 11);
 				printf("Type the position you want to move(x y):");
 				scanf("%d %d", &x, &y);
 				if (x > 2 || x < 1)
-					fprintf(sock_fp, "m 0 0 title content");
-				else
-					fprintf(sock_fp, "m %d %d title content", x, y);
+					write(sock_id, "m",5);
+				else {
+					sprintf(op, "m %d %d", x, y);
+					write(sock_id, op, strlen(op));
+				}
 			}
 			else if (strcmp(op, "q\n") == 0)
-				fprintf(sock_fp, "q 0 0 title content");
+				write(sock_id, "q",5);
 			printf("reading message from server\n");
-			while ((length = read(sock_id, message, 10000)) != 0) {
-				sleep(1);
+			length=read(sock_id, message, 10000);
 				write(1, message, length);
-			}
 		}
-		
-	}
 }
 
