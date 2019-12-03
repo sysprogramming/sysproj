@@ -178,11 +178,11 @@ int main(int ac, char* av[]) {
 			
 		show_project();
 		gotoxy(PROJI, 1);
-		printf("SELECT THE PROJECT!!! (if you want to quit, type 'q' ");
+		printf("SELECT THE PROJECT!!! (if you want to quit, type 6 ");
 		
 			scanf("%d", &PROJindex);
 			gotoxy(PROJI, 2);
-			if (PROJindex < 1 && PROJindex>5) {
+			if (PROJindex < 1 && PROJindex>6) {
 				printf("Wrong position! type again");
 				clrscr();
 				sleep(1);
@@ -190,9 +190,10 @@ int main(int ac, char* av[]) {
 			else
 				break;
 		}
-		if (PROJindex == 'q') {
+		if (PROJindex == 6) {
 			request = EXIT_REQUEST;
 			fwrite(&request, sizeof(int), 1, sock_fpo);
+fflush(sock_fpo);
 			break;
 		}
 		clrscr();

@@ -58,8 +58,17 @@ void Login() {}              //Login
 void show_screen() {}        //print function
 void add_project() {}
 void delete_project() {}
-
-
+void save_bfile(FILE* fp){
+printf("saving binary file start\n");
+for(int i=0;i<5;i++)
+fwrite(&PROJ[i],sizeof(PROJECT),1,fp);
+fflush(fp);
+}
+void read_bfile(FILE *fp){
+printf("reading binary file start\n");
+for(int i=0;i<5;i++)
+fread(&PROJ[i],sizeof(PROJECT),1,fp);
+}
 void writePROJ(FILE* sock_fpo) {
 	for (int i = 0; i < 5; i++) {
 		printf("write the project to client\n");
@@ -81,7 +90,7 @@ int main(int ac, char* av[]) {
 	char hostname[HOSTLEN];
 	char op[BUFSIZ];
 	int sock_id, sock_fd;
-	FILE* sock_fpi,*sock_fpo;
+	FILE* sock_fpi,*sock_fpo,*saveo,*savei;
 	char* ctime();
 	time_t thetime;
 	int x, y;
@@ -107,7 +116,9 @@ int main(int ac, char* av[]) {
 	if (listen(sock_id, 1) != 0)
 		oops("listen");
 
-
+savei=fopen("save.txt","r");
+read_bfile(savei);
+fclose(savei);
 	sock_fd = accept(sock_id, NULL, NULL);
 	printf("Wow!got a call\n");
 	if (sock_fd == -1)
@@ -132,7 +143,10 @@ int main(int ac, char* av[]) {
 			break;
 		}
 }
+saveo=fopen("save.txt","w");
+save_bfile(saveo);
 	fclose(sock_fpi);
 	fclose(sock_fpo);
+fclose(saveo);
 }
 
