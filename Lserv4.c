@@ -107,7 +107,7 @@ int main(int ac, char* av[]) {
 	gethostname(hostname, HOSTLEN);
 	hp = gethostbyname(hostname);
 	bcopy((void*)hp->h_addr, (void*)& saddr.sin_addr, hp->h_length);
-	saddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	saddr.sin_addr.s_addr = inet_addr("192.168.122.115");
 	saddr.sin_port = htons(PORTNUM);
 	saddr.sin_family = AF_INET;
 
