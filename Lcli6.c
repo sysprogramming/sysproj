@@ -22,11 +22,21 @@
 #define HOSTLEN 256
 #define oops(msg) {perror(msg);exit(1);}
 #define PROJI 10
+#define LOGIX 100
+#define LOGIY 30
 #define PROJW_REQUEST 100
 #define PROJR_REQUEST 101
 #define EXIT_REQUEST  102
+#define IDL 21
+#define PWL 21
+#define NAMEL 21
+#define ONLINE 1
+#define OFFLINE 0
+#define LOGIN_REQUEST 200
+#define REGISTER_REQUEST 300
 
 pthread_mutex_t PROJ_lock = PTHREAD_MUTEX_INITIALIZER;
+
 void clrscr(void)
 {
 	write(1, "\033[1;1H\033[2J", 10);
@@ -34,6 +44,7 @@ void clrscr(void)
 
 int PROJnum = 0;
 int PROJindex = -1;
+int USERSIZE=0;
 void gotoxy(int x, int y)
 {
 	printf("%c[%d;%df", 0x1B, y, x);
@@ -41,9 +52,10 @@ void gotoxy(int x, int y)
 
 
 typedef struct USERINFO {
-	char ID[20];
-	char PW[20];
-	char name[20];
+	char ID[IDL];
+	char PW[PWL];
+	char name[NAMEL];
+	int status;
 } USERINFO;
 
 typedef struct TASK_BLOCK {
@@ -55,13 +67,12 @@ typedef struct TASK_BLOCK {
 typedef struct PROJECT {
 	char title[TL];
 	TASK_BLOCK ARR[3][30];
-	USERINFO USERARR[30];
 	int SIZE[3];
 }PROJECT;
 PROJECT PROJ[5] = { 0 };
+USERINFO USERLIST[200] = { 0 };
 
 int add_block(PROJECT *PROJ, char* title, char* content) {
-	
 	strcpy(PROJ->ARR[0][PROJ->SIZE[0]].title, title);
 	strcpy(PROJ->ARR[0][PROJ->SIZE[0]++].content, content);
 }
@@ -75,6 +86,13 @@ void show_block(TASK_BLOCK arr[30], int size, int printindex) {
 	int yindex = 5;
 	for (int i = 0; i < size; i++) {
 		length = strlen(arr[i].content);
+		gotoxy((printindex - 1) * 37, 1);
+		if (printindex == DOI)
+			printf("TO - DO things");
+		else if (printindex == DOINGI)
+			printf("DOING things");
+		else
+			printf("DONE things");
 		gotoxy((printindex - 1) * 37, yindex++);
 		printf( " %d %d--------------------------- ", printindex, i + 1);
 		gotoxy((printindex - 1) * 37, yindex++);
@@ -116,7 +134,7 @@ void show_project() {
 		gotoxy(PROJI, yindex++);
 		printf("----------------------------------------------------------------------------------------------");
 		gotoxy(PROJI, yindex++);
-		printf("I Project1: %50s I", PROJ[i].title);
+		printf("I Project %d : %50s I",i+1, PROJ[i].title);
 		gotoxy(PROJI, yindex++);
 		printf("I USERLIST: %50s I", "");
 		gotoxy(MENUI + 12, yindex);
@@ -134,8 +152,59 @@ void writePROJ(FILE* sock_fpo,int PROJindex) {
 	fwrite(&PROJ[PROJindex], sizeof(PROJECT), 1, sock_fpo);
 	fflush(sock_fpo);
 }
-int main(int ac, char* av[]) {
+void Register(void){
+	int yindex;
+	yindex = LOGIY;
+	gotoxy(LOGIX, yindex);
+	yindex += 5;
+	printf("Welcome to LiRello !!!  Register new account");
+	gotoxy(LOGIX, yindex++);
+	printf("  ID: ");
+	gotoxy(LOGIX, yindex++);
+	printf("  PW: ");
+	gotoxy(LOGIX, yindex);
+	printf("NAME: ");
+	yindex -= 2;
+	gotoxy(LOGIX + 6, yindex++);
+	scanf("%s", USERLIST[USERSIZE].ID);
+	gotoxy(LOGIX + 6, yindex++);
+	scanf("%s", USERLIST[USERSIZE].PW);
+	gotoxy(LOGIX + 6, yindex);
+	scanf("%s", USERLIST[USERSIZE++].name);
+}
 
+void Login(int *USERINDEX) {
+	char ID[IDL];
+	char PW[PWL];
+	int yindex;
+	while (1) {
+		yindex = LOGIY;
+		gotoxy(LOGIX, yindex);
+		yindex += 5;
+		printf("Welcome to LiRello !!! Type your ID and PASSWORD");
+		gotoxy(LOGIX, yindex++);
+		printf("ID: ");
+		gotoxy(LOGIX, yindex--);
+		printf("PW: ");
+		gotoxy(LOGIX + 4, yindex++);
+		scanf("%s", ID);
+		gotoxy(LOGIX + 4, yindex++);
+		scanf("%s", PW);
+		for (int i = 0; i <USERSIZE; i++) {
+			if (strcmp(USERLIST[i].ID, ID) == 0)
+				if (strcmp(USERLIST[i].PW, PW) == 0) {
+					*USERINDEX = i;
+					USERLIST[i].status = ONLINE;
+					return;
+				}
+		}
+		gotoxy(LOGIX, yindex);
+		printf("ID or PASSWORD is wrong !!!");
+		sleep(1);
+		clrscr();
+	}
+}
+int main(int ac, char* av[]) {
 	void* Reading_data(void*);
 	pthread_t Rth;
 	struct sockaddr_in servadd;
@@ -150,6 +219,7 @@ int main(int ac, char* av[]) {
 	int request;
 	char title[TL];
 	char content[CL];
+	int userindex = -1;
 	sock_id = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock_id == -1)
 		oops("socket");
@@ -176,6 +246,21 @@ int main(int ac, char* av[]) {
 	readPROJ(sock_fpi);
 	pthread_create(&Rth,NULL,Reading_data,(void*)sock_fpi);
 	while(1){
+		while (userindex == -1) {
+			gotoxy(LOGIX, LOGIY);
+			printf("WELCOME TO LIRELLO!!!");
+			gotoxy(LOGIX, LOGIY + 1);
+			printf("if you want to Login, type 200, or 300 to Register");
+			gotoxy(LOGIX, LOGIY + 2);
+			scanf("%d", &request);
+			if (request == LOGIN_REQUEST) {
+				Login(&userindex);
+			}
+			else if (request == REGISTER_REQUEST) {
+				Register();
+			}
+			clrscr();
+		}
 
 		while (1) {
 			
@@ -197,10 +282,12 @@ int main(int ac, char* av[]) {
 			request = EXIT_REQUEST;
 			fwrite(&request, sizeof(int), 1, sock_fpo);
 fflush(sock_fpo);
+USERLIST[userindex].status = OFFLINE;
+clrscr();
 			break;
 		}
 		clrscr();
-		
+		PROJindex -= 1;
 		while (1) {
 			show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
 			show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
@@ -282,6 +369,10 @@ void* Reading_data(void* fp) {
 		else if (request == EXIT_REQUEST)
 			break;
 	}
+
+}
+
+void* show_ONLINEUSER(void* fp) {
 
 }
 
