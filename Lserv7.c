@@ -115,6 +115,8 @@ void readPROJ(FILE* sock_fpi) {
 }
 void writeUSER(FILE* sock_fpo) {
 	printf("write USERLIST\n");
+	fwrite(&USERSIZE, sizeof(int), 1, sock_fpo);
+	fflush(sock_fpo);
 	for(int i=0;i<200;i++)
 	fwrite(&USERLIST[i], sizeof(USERINFO), 1, sock_fpo);
 	fflush(sock_fpo);
@@ -201,6 +203,7 @@ fclose(numi);
 		else if (request == USERR_REQUEST) {
 			printf("Request is USERR\n");
 			readUSER(sock_fpi);
+			printf("Current USERSIZE is%d\n", USERSIZE);
 			request = USERR_REQUEST;
 			fwrite(&request, sizeof(int), 1, sock_fpo);
 			fflush(sock_fpo);

@@ -90,7 +90,7 @@ void delete_block(TASK_BLOCK arr[30], int index, int size) {    //function that 
 void show_ONLINEUSER(void) {
 	int yindex=SHOW_ONLINEY;
 	gotoxy(SHOW_ONLINEX, yindex++);
-	printf("------------------------------");
+	printf("-------------------------------------");
 	for (int i = 0; i < USERSIZE; i++) {
 		if (USERLIST[i].status == ONLINE) {
 			gotoxy(SHOW_ONLINEX, yindex++);
@@ -103,7 +103,7 @@ void show_ONLINEUSER(void) {
 		}
 	}
 	gotoxy(SHOW_ONLINEX, yindex);
-	printf("------------------------------");
+	printf("-------------------------------------");
 }
 
 
@@ -214,6 +214,7 @@ void read_USER(FILE* sock_fpo,FILE* sock_fpi) {
 	int request = USERW_REQUEST;
 	fwrite(&request, sizeof(int), 1, sock_fpo);
 	fflush(sock_fpo);
+	fread(&USERSIZE, sizeof(int), 1, sock_fpi);
 	for(int i=0;i<200;i++)
 	fread(&USERLIST[i], sizeof(USERINFO), 1, sock_fpi);
 }
