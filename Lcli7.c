@@ -94,12 +94,12 @@ void show_ONLINEUSER(void) {
 	for (int i = 0; i < USERSIZE; i++) {
 		if (USERLIST[i].status == ONLINE) {
 			gotoxy(SHOW_ONLINEX, yindex++);
-			printf("|%-20s  ONLINE     |", USERLIST[i].name);
+			printf("|%-20s  ONLINE       |", USERLIST[i].name);
 		}
 		else
 		{
 			gotoxy(SHOW_ONLINEX, yindex++);
-			printf("|%-20s  OFFLINE    |", USERLIST[i].name);
+			printf("|%-20s  OFFLINE      |", USERLIST[i].name);
 		}
 	}
 	gotoxy(SHOW_ONLINEX, yindex);
@@ -441,6 +441,7 @@ void* Reading_data(void* fp) {
 			break;
 		else if (request == USERR_REQUEST) {
 			pthread_mutex_lock(&PROJ_lock);
+			fread(&USERSIZE, sizeof(int), 1, sock_fpi);
 			fread(USERLIST, sizeof(USERINFO), 200, sock_fpi);
 			pthread_mutex_unlock(&PROJ_lock);
 		}
