@@ -356,7 +356,7 @@ clrscr();
 		PROJindex -= 1;
 		while (1) {
 			//When USER select the project, program print the TASK BLOCKS in PROJECT
-			SHOW_ONLINEUSER();
+			show_ONLINEUSER();
 			show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
 			show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
 			show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
