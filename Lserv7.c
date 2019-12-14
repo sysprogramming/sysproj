@@ -173,11 +173,11 @@ fclose(numi);
 	printf("Wow!got a call\n");
 	if (sock_fd == -1)
 		oops("accept");
-	sock_fpi = fdopen(sock_fd, "r");
-	sock_fpo = fdopen(sock_fd, "w");
+	sock_fpi = fdopen(sock_fd, "r"); //open FILE stream between server and client
+	sock_fpo = fdopen(sock_fd, "w"); //open FILE stream between server and client
 	if (sock_fpi == NULL||sock_fpo==NULL)
 		oops("fdopen");
-	while (request!=EXIT_REQUEST) {
+	while (request!=EXIT_REQUEST) { 
 		printf("Receive request from client \n");
 		fread(&request, sizeof(int), 1, sock_fpi);
 		if (request == PROJR_REQUEST) {

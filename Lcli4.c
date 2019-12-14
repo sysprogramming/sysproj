@@ -37,7 +37,14 @@ void gotoxy(int x, int y)
 	printf("%c[%d;%df", 0x1B, y, x);
 }
 
-
+void add_PROJECT(int index) {
+	char buf[TL];
+	gotoxy(PROJ,I2);
+	printf("PROJECT TITLE");
+	fgets(buf, TL - 1, stdin);
+	buf[strlen(buf) - 1] = '\0';
+	strcpy(PROJ[index].title, buf);
+}
 typedef struct USERINFO {
 	char ID[20];
 	char PW[20];
@@ -58,16 +65,16 @@ typedef struct PROJECT {
 }PROJECT;
 PROJECT PROJ[5] = { 0 };
 
-int add_block(TASK_BLOCK* add, char* title, char* content) {
+int add_block(TASK_BLOCK* add, char* title, char* content) {  // add to-do block to project 
 	strcpy(add->title, title);
 	strcpy(add->content, content);
 }
-void delete_block(TASK_BLOCK arr[30], int index, int size) {
+void delete_block(TASK_BLOCK arr[30], int index, int size) { 
 	for (int i = index; i < size - 1; i++) {
 		arr[i] = arr[i + 1];
 	}
 }
-void show_block(TASK_BLOCK arr[30], int size, int printindex) {
+void show_block(TASK_BLOCK arr[30], int size, int printindex) {  //show existing task block in current project
 	int length = 0;
 	int yindex = 5;
 	for (int i = 0; i < size; i++) {
@@ -103,11 +110,11 @@ void show_block(TASK_BLOCK arr[30], int size, int printindex) {
 
 	}
 }
-void move_BLOCK(TASK_BLOCK a[30], TASK_BLOCK b[30], int y, int size1, int size2) {
+void move_BLOCK(TASK_BLOCK a[30], TASK_BLOCK b[30], int y, int size1, int size2) { //move TASK_BLOCK to next state 
 	b[size2] = a[y];
 	delete_block(a, y, size1);
 }
-void show_project() {
+void show_project() { //project menu printing function
 	int yindex = 5;
 	for (int i = 0; i < 5; i++) {
 		gotoxy(PROJI, yindex++);
@@ -122,19 +129,20 @@ void show_project() {
 		yindex += 2;
 	}
 }
-void readPROJ(FILE* sock_fpi) {
+void readPROJ(FILE* sock_fpi) { //receive project data from server
 	for (int i = 0; i < 5; i++) {
 		fread(&PROJ[i], sizeof(PROJECT), 1, sock_fpi);
 	}
 	printf("read operation complete\n");
 }
-void writePROJ(FILE* sock_fpo,int PROJindex) {
+void writePROJ(FILE* sock_fpo,int PROJindex) {  // give the project data to server
 	fwrite(&PROJ[PROJindex], sizeof(PROJECT), 1, sock_fpo);
 	fflush(sock_fpo);
 }
 int main(int ac, char* av[]) {
 	struct sockaddr_in servadd;
 	struct hostent* hp;
+	USERINFO me = { 0 };
 	int length;
 	int sock_id, sock_fd;
 	char message[10000];
@@ -174,11 +182,12 @@ int main(int ac, char* av[]) {
 
 	while(1){
 
-		while (1) {
+		while (1) {} // show Login menu 
+		while (1) { //show existing PROJECT
 			
 		show_project();
 		gotoxy(PROJI, 1);
-		printf("SELECT THE PROJECT!!! (if you want to quit, type 6 ");
+		printf("SELECT THE PROJECT!!! (if you want to quit, type 6 ");   //receive project index from users, 
 		
 			scanf("%d", &PROJindex);
 			gotoxy(PROJI, 2);
@@ -194,10 +203,11 @@ int main(int ac, char* av[]) {
 			request = EXIT_REQUEST;
 			fwrite(&request, sizeof(int), 1, sock_fpo);
 fflush(sock_fpo);
+clrscr();
 			break;
 		}
 		clrscr();
-		while (1) {
+		while (1) {  //show the project content and modify the data
 			show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
 			show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
 			show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
