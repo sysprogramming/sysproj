@@ -39,6 +39,8 @@
 #define REGISTER_REQUEST 2
 #define SHOW_ONLINEX 120                        //online user print x position
 #define SHOW_ONLINEY 20                        //online user print y position
+#define PROJ_AV 1
+#define PROJ_NOTAV 0
 pthread_mutex_t PROJ_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void clrscr(void)   //function that clear the screen
@@ -72,6 +74,7 @@ typedef struct PROJECT {   //DATA STRUCTURE of PROJECT
 	char title[TL];
 	TASK_BLOCK ARR[3][30];
 	int SIZE[3];
+	int status;
 }PROJECT;
 PROJECT PROJ[5] = { 0 };   // project array
 USERINFO USERLIST[200] = { 0 }; //USERLIST array
@@ -94,12 +97,12 @@ void show_ONLINEUSER(void) {
 	for (int i = 0; i < USERSIZE; i++) {
 		if (USERLIST[i].status == ONLINE) {
 			gotoxy(SHOW_ONLINEX, yindex++);
-			printf("|%20s  ONLINE         |", USERLIST[i].name);
+			printf("|%-20s  ONLINE         ", USERLIST[i].name);
 		}
 		else
 		{
 			gotoxy(SHOW_ONLINEX, yindex++);
-			printf("|%20s  OFFLINE        |", USERLIST[i].name);
+			printf("|%-20s  OFFLINE        ", USERLIST[i].name);
 		}
 	}
 	gotoxy(SHOW_ONLINEX, yindex);
@@ -162,7 +165,7 @@ void show_project() {
 		gotoxy(PROJI, yindex++);
 		printf("----------------------------------------------------------------------------------------------");
 		gotoxy(PROJI, yindex++);
-		printf("I Project %d : %50s I",i+1, PROJ[i].title);
+		printf("| Project %d : %-50s         |",i+1, PROJ[i].title);
 		gotoxy(PROJI, yindex++);
 		gotoxy(MENUI + 12, yindex);
 		gotoxy(PROJI, yindex++);
@@ -235,6 +238,7 @@ void Login(int *USERINDEX,FILE* sock_fpo) {
 	char PW[PWL];
 	int yindex;
 	while (1) {
+		clrscr();
 		yindex = LOGIY;
 		gotoxy(LOGIX, yindex);
 		yindex += 5;
@@ -263,8 +267,15 @@ void Login(int *USERINDEX,FILE* sock_fpo) {
 		clrscr();
 	}
 }
-FILE* sock_fpo,*sock_fpi;
-int sock_id, sock_fd;
+void add_PROJ(int index) { //add PROJECT function!
+	clrscr();
+	gotoxy(LOGIX, LOGIY);
+	printf("Type PROJECT NAME! ");
+	fgets(PROJ[index].title, sizeof(char) * (TL - 1), 0);
+	PROJ[index].title[strlen(PROJ[index].title) - 1] = '\0';
+	PROJ[index].status = PROJ_AV;
+}
+
 void* readdata(void*);
 int main(int ac, char* av[]) {
 	void* Reading_data(void*);
@@ -272,12 +283,12 @@ int main(int ac, char* av[]) {
 	struct sockaddr_in servadd;
 	struct hostent* hp;
 	int length;
-	
+	int sock_id, sock_fd;
 	char message[10000];
 	int messlen;
 	char op[20];
 	int x, y;
-	//FILE* sock_fpo,*sock_fpi;
+	FILE* sock_fpo,*sock_fpi;
 	int request;
 	char title[TL];
 	char content[CL];
@@ -363,6 +374,15 @@ clrscr();
 		}
 		clrscr();
 		PROJindex -= 1;
+		if (PROJ[PROJindex].status == PROJ_NOTAV) {
+			add_PROJ(PROJindex);
+			request = PROJR_REQUEST;
+			fwrite(&request, sizeof(int), 1, sock_fpo);
+			//readPROJ(sock_fpi);
+			//read_USER(sock_fpo, sock_fpi);
+			fwrite(&PROJindex, sizeof(int), 1, sock_fpo);
+			writePROJ(sock_fpo, PROJindex);
+		}
 		while (1) {
 			//When USER select the project, program print the TASK BLOCKS in PROJECT
 			//request = PROJW_REQUEST;
@@ -379,7 +399,7 @@ clrscr();
 			show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
 
 			gotoxy(MENUI, 10);
-			printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to back to PROJECT select) "); //USER can add new DO block if type 'a' or move the block by 'm' or delete by 'd'
+			printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) "); //USER can add new DO block if type 'a' or move the block by 'm' or delete by 'd'
 			fgets(op, 19, stdin);
 
 			if (op[0] == 'a') {
@@ -399,13 +419,6 @@ clrscr();
 				fwrite(&PROJindex, sizeof(int), 1, sock_fpo);
 				writePROJ(sock_fpo, PROJindex);
 				request = PROJW_REQUEST;
-
-
-//readPROJ(sock_fpi);
-				//read_USER(sock_fpo, sock_fpi);
-		//fwrite(&request, sizeof(int), 1, sock_fpo);
-		//fflush(sock_fpo);
-		
 				
 
 			}
@@ -449,6 +462,7 @@ clrscr();
 				clrscr();
 				break;
 			} //if user type 'q', go back to PROJECT select screen
+			else if(op[0]=='r'){}
 			clrscr();
 			}
 		}
