@@ -309,7 +309,11 @@ int main(int ac, char* av[]) {
 	read_USER(sock_fpo, sock_fpi);
 	
 	pthread_create(&Rth,NULL,Reading_data,(void*)sock_fpi); // Create new thread do the Reading_data function
+<<<<<<< HEAD
 	//pthread_create(&Rth,NULL,readdata,NULL); // Create new thread do the Reading_data function
+=======
+	pthread_create(&Rth,NULL,readdata,NULL); // Create new thread do the Reading_data function
+>>>>>>> 1577be3176b24494796c35474d77c4a19b994873
 	while(1){  /*USER must Login or register new account to start the LiRello*/
 		while (userindex == -1) {
 			gotoxy(LOGIX, LOGIY);
@@ -486,4 +490,7 @@ void* readdata(void *fp){
 	return NULL;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1577be3176b24494796c35474d77c4a19b994873

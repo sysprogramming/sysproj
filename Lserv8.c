@@ -140,6 +140,7 @@ int main(int ac, char* av[]) {
 	time_t thetime;
 	char* ctime();
 	int clnt_adr_sz;
+<<<<<<< HEAD
 	FILE* usero, * useri, * numi, * numo;
 	pthread_t t_id;
 	FILE* saveo, * savei;
@@ -155,6 +156,11 @@ int main(int ac, char* av[]) {
 	fclose(numi);
 	pthread_mutex_init(&mutx,NULL);
 	
+=======
+	pthread_t t_id;
+	
+	pthread_mutex_init(&mutx,NULL);
+>>>>>>> 1577be3176b24494796c35474d77c4a19b994873
 	sock_id = socket(PF_INET, SOCK_STREAM, 0);
 	if (sock_id == -1)
 		oops("socket");
@@ -194,6 +200,7 @@ int main(int ac, char* av[]) {
 		
 	}
 	close(sock_id);
+<<<<<<< HEAD
 	saveo = fopen("save.txt", "w");
 	usero = fopen("user.txt", "w");
 	numo = fopen("num.txt", "w");
@@ -204,6 +211,10 @@ int main(int ac, char* av[]) {
 	fclose(saveo);
 	fclose(usero);
 	fclose(numo);
+=======
+
+
+>>>>>>> 1577be3176b24494796c35474d77c4a19b994873
     return 0;	
 
 }
@@ -228,8 +239,13 @@ void *handle_clnt(void * arg){
 }
 
 void client_request_processing(int sock_fd){
+<<<<<<< HEAD
 	FILE* sock_fpi, * sock_fpo;
 	
+=======
+	FILE* sock_fpi,*sock_fpo,*saveo,*savei;
+	FILE* usero, * useri, * numi, * numo;
+>>>>>>> 1577be3176b24494796c35474d77c4a19b994873
 
 	int x, y;
 	char title[TL];
@@ -238,6 +254,19 @@ void client_request_processing(int sock_fd){
 	int PROJindex;
 	int index = -1;
 	
+<<<<<<< HEAD
+=======
+	useri = fopen("user.txt", "r");
+	numi = fopen("num.txt", "r");
+
+	savei=fopen("save.txt","r");
+	read_num(numi);
+	read_USER(useri);
+	read_bfile(savei);
+	fclose(savei);
+	fclose(useri);
+	fclose(numi);
+>>>>>>> 1577be3176b24494796c35474d77c4a19b994873
 
 	sock_fpi = fdopen(sock_fd, "r"); //open FILE stream between server and client
 	sock_fpo = fdopen(sock_fd, "w");//open FILE stream between server and client
@@ -294,6 +323,7 @@ void client_request_processing(int sock_fd){
 			writeUSER(sock_fpo);
 		}
 }
+<<<<<<< HEAD
 
 	fclose(sock_fpi);
 	fclose(sock_fpo);
@@ -302,3 +332,20 @@ void client_request_processing(int sock_fd){
 }
 
 
+=======
+saveo=fopen("save.txt","w");
+usero = fopen("user.txt", "w");
+numo = fopen("num.txt", "w");
+
+save_bfile(saveo);
+save_num(numo);
+save_USER(usero);
+	fclose(sock_fpi);
+	fclose(sock_fpo);
+fclose(saveo);
+fclose(usero);
+fclose(numo);
+	
+}
+
+>>>>>>> 1577be3176b24494796c35474d77c4a19b994873
