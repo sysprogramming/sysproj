@@ -253,7 +253,7 @@ void Login(int *USERINDEX,FILE* sock_fpo) {
 			if (strcmp(USERLIST[i].ID, ID) == 0)
 				if (strcmp(USERLIST[i].PW, PW) == 0) {
 					*USERINDEX = i;
-					changestatus(sock_fpo, userindex);
+					changestatus(sock_fpo, *USERINDEX);
 					return;
 				}
 		}
@@ -314,7 +314,7 @@ int main(int ac, char* av[]) {
 
 	//pthread_create(&Rth,NULL,readdata,NULL); // Create new thread do the Reading_data function
 
-	pthread_create(&Rth,NULL,readdata,NULL); // Create new thread do the Reading_data function
+	//pthread_create(&Rth,NULL,readdata,NULL); // Create new thread do the Reading_data function
 
 	while(1){  /*USER must Login or register new account to start the LiRello*/
 		while (userindex == -1) {
