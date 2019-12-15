@@ -35,8 +35,8 @@
 #define NAMEL 21                               //NAME length
 #define ONLINE 1                               //online status
 #define OFFLINE 0                              //offline status
-#define LOGIN_REQUEST 200                     
-#define REGISTER_REQUEST 300
+#define LOGIN_REQUEST 1                     
+#define REGISTER_REQUEST 2
 #define SHOW_ONLINEX 120                        //online user print x position
 #define SHOW_ONLINEY 20                        //online user print y position
 pthread_mutex_t PROJ_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -94,12 +94,12 @@ void show_ONLINEUSER(void) {
 	for (int i = 0; i < USERSIZE; i++) {
 		if (USERLIST[i].status == ONLINE) {
 			gotoxy(SHOW_ONLINEX, yindex++);
-			printf("|%-20s  ONLINE       |", USERLIST[i].name);
+			printf("|%20s  ONLINE         |", USERLIST[i].name);
 		}
 		else
 		{
 			gotoxy(SHOW_ONLINEX, yindex++);
-			printf("|%-20s  OFFLINE      |", USERLIST[i].name);
+			printf("|%20s  OFFLINE        |", USERLIST[i].name);
 		}
 	}
 	gotoxy(SHOW_ONLINEX, yindex);
@@ -164,7 +164,6 @@ void show_project() {
 		gotoxy(PROJI, yindex++);
 		printf("I Project %d : %50s I",i+1, PROJ[i].title);
 		gotoxy(PROJI, yindex++);
-		printf("I USERLIST: %50s I", "");
 		gotoxy(MENUI + 12, yindex);
 		gotoxy(PROJI, yindex++);
 		printf("----------------------------------------------------------------------------------------------");
@@ -231,7 +230,7 @@ void changestatus(FILE* sock_fpo, int index) {
 /* At the start of client program, USER must Login with existing ID and PW. if USER dont have account
 user must Register new account*/
 int lt=0;
-void Login(int *USERINDEX) {
+void Login(int *USERINDEX,FILE* sock_fpo) {
 	char ID[IDL];
 	char PW[PWL];
 	int yindex;
@@ -239,19 +238,22 @@ void Login(int *USERINDEX) {
 		yindex = LOGIY;
 		gotoxy(LOGIX, yindex);
 		yindex += 5;
-		printf("Welcome to LiRello !!! Type your ID and PASSWORD");
+		printf("Welcome to LiRello !!! Type your ID and PASSWORD (if you want to go back, type 'b' in ID section");
 		gotoxy(LOGIX, yindex++);
 		printf("ID: ");
 		gotoxy(LOGIX, yindex--);
 		printf("PW: ");
 		gotoxy(LOGIX + 4, yindex++);
 		scanf("%s", ID);
+		if (strcmp(ID, "b") == 0)
+			return;
 		gotoxy(LOGIX + 4, yindex++);
 		scanf("%s", PW);
 		for (int i = 0; i <200; i++) {
 			if (strcmp(USERLIST[i].ID, ID) == 0)
 				if (strcmp(USERLIST[i].PW, PW) == 0) {
 					*USERINDEX = i;
+					changestatus(sock_fpo, userindex);
 					return;
 				}
 		}
@@ -309,22 +311,22 @@ int main(int ac, char* av[]) {
 	read_USER(sock_fpo, sock_fpi);
 	
 	pthread_create(&Rth,NULL,Reading_data,(void*)sock_fpi); // Create new thread do the Reading_data function
-<<<<<<< HEAD
+
 	//pthread_create(&Rth,NULL,readdata,NULL); // Create new thread do the Reading_data function
-=======
+
 	pthread_create(&Rth,NULL,readdata,NULL); // Create new thread do the Reading_data function
->>>>>>> 1577be3176b24494796c35474d77c4a19b994873
+
 	while(1){  /*USER must Login or register new account to start the LiRello*/
 		while (userindex == -1) {
 			gotoxy(LOGIX, LOGIY);
 			printf("WELCOME TO LIRELLO!!!");
 			gotoxy(LOGIX, LOGIY + 1);
-			printf("if you want to Login, type 200, or 300 to Register"); //if USER type 200, goto Login screen, 300 to Register screen
+			printf("if you want to Login, type 1, or 2 to Register"); //if USER type 200, goto Login screen, 300 to Register screen
 			gotoxy(LOGIX, LOGIY + 2);
 			scanf("%d", &request);
 			if (request == LOGIN_REQUEST) {
-				Login(&userindex);
-				changestatus(sock_fpo, userindex); //If Login Success, change the USER`s status to ONLINE and give this data to server
+				Login(&userindex,sock_fpo);
+				 //If Login Success, change the USER`s status to ONLINE and give this data to server
 			}
 			else if (request == REGISTER_REQUEST) { 
 				Register(&userbuf);
@@ -479,18 +481,3 @@ void* Reading_data(void* fp) {
 	}
 	return NULL;
 }
-void* readdata(void *fp){
-	
-	if(lt==1){
-	pthread_mutex_lock(&PROJ_lock);
-		readPROJ(sock_fpi);
-	pthread_mutex_unlock(&PROJ_lock);
-	lt=0;
-	}
-	return NULL;
-}
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 1577be3176b24494796c35474d77c4a19b994873
