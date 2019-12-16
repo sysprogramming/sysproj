@@ -435,6 +435,7 @@ gotoxy(LOGIX-30,20 );
 		}
 		
 		while (1) {
+clrscr();
 			PROJindex = -1;
 		// After Login, User can see PROJECT LIST and can select the project by type their number	
 		show_project();
