@@ -474,8 +474,8 @@ clrscr();
 struct winsize w;
 			ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 			cursor = w.ws_col;
-			clrscr();
 		while (1) {
+			clrscr();
 			op[0] = 'A';
 			show_ONLINEUSER();
 			show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
@@ -569,8 +569,7 @@ void* Reading_data(void* fp) {
 		if (request == PROJR_REQUEST) {
 			pthread_mutex_lock(&PROJ_lock);
 			readPROJ(sock_fpi);
-			pthread_mutex_unlock(&PROJ_lock);
-			if (op[0] == 'A') {
+			/*if (op[0] == 'A') {
 				clrscr();
 				show_ONLINEUSER();
 				show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
@@ -578,7 +577,8 @@ void* Reading_data(void* fp) {
 				show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
 				gotoxy(0, cursor);
 				printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) ");
-			}
+			}*/
+			pthread_mutex_unlock(&PROJ_lock);
 		}
 		else if (request == EXIT_REQUEST) //when user want to quit, the server give EXIT_REQUEST to client to stop this thread function
 			break;
@@ -586,8 +586,7 @@ void* Reading_data(void* fp) {
 			pthread_mutex_lock(&PROJ_lock);
 			fread(&USERSIZE, sizeof(int), 1, sock_fpi);
 			fread(USERLIST, sizeof(USERINFO), 200, sock_fpi);
-			pthread_mutex_unlock(&PROJ_lock);
-			if (op[0] == 'A') {
+			/*if (op[0] == 'A') {
 				clrscr();
 				show_ONLINEUSER();
 				show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
@@ -595,7 +594,9 @@ void* Reading_data(void* fp) {
 				show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
 				gotoxy(0, cursor);
 				printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) ");
-			}
+			}*/
+			pthread_mutex_unlock(&PROJ_lock);
+			
 		}
 	}
 	return NULL;
