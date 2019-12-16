@@ -378,6 +378,7 @@ int main(int ac, char* av[]) {
 	int ext=0;
 	while(1){  /*USER must Login or register new account to start the LiRello*/
 		while (userindex == -1) {
+			PROJindex = -2;
 int banx=LOGIX-45,bany=0,banx2=5;
 gotoxy(banx, bany+5);
 printf(" __     __     ______     __         ______     ______     __    __     ______\n");      
@@ -435,6 +436,7 @@ gotoxy(LOGIX-30,20 );
 		}
 		
 		while (1) {
+			PROJindex = -1;
 		// After Login, User can see PROJECT LIST and can select the project by type their number	
 		show_project();
 		gotoxy(PROJI, 1);
@@ -474,7 +476,8 @@ clrscr();
 struct winsize w;
 			ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		while (1) {
-			
+
+			PRINTBLOCK:clrscr();
 			show_ONLINEUSER();
 			show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
 			show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
@@ -568,13 +571,13 @@ void* Reading_data(void* fp) {
 	FILE* sock_fpi = (FILE*)fp;
 	int request = 0;
 
-	while (request!=EXIT_REQUEST) {
+	while (request != EXIT_REQUEST) {
 		fread(&request, sizeof(int), 1, sock_fpi);
 		if (request == PROJR_REQUEST) {
 			pthread_mutex_lock(&PROJ_lock);
 			readPROJ(sock_fpi);
 			pthread_mutex_unlock(&PROJ_lock);
-
+			if (PROJindex == -1) { goto PRINTBLOCK; }
 		}
 		else if (request == EXIT_REQUEST) //when user want to quit, the server give EXIT_REQUEST to client to stop this thread function
 			break;
