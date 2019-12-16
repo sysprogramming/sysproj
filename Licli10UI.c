@@ -335,10 +335,7 @@ void sighandler(int sig_num)
 	show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
 
 
-	gotoxy(0,w.ws_col );
-	printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) "); //USER can add new DO block if type 'a' or move the block by 'm' or delete by 'd'
-	while (getchar() != '\n');
-	fgets(op, 19, stdin);
+	
 	
 } 
 int main(int ac, char* av[]) {
@@ -490,7 +487,7 @@ clrscr();
 struct winsize w;
 			ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		while (1) {
-			sleep(1);
+			
 			//When USER select the project, program print the TASK BLOCKS in PROJECT
 			//request = PROJW_REQUEST;
 			//pthread_create(&Rth,NULL,Reading_data,(void*)sock_fpi); // Create new thread do the Reading_data function
@@ -499,15 +496,14 @@ struct winsize w;
 			//fflush(sock_fpo);
 			//readPROJ(sock_fpi);
 			//read_USER(sock_fpo, sock_fpi);
-			op[0]='r';
 			show_ONLINEUSER();
 			show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
 			show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
-			show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
-			gotoxy(0,w.ws_col );
-	printf("Press CTRL+Z to select options "); //USER can add new DO block if type 'a' or move the block by 'm' or delete by 'd'
-			
-			
+			show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);		
+	gotoxy(0, w.ws_col);
+	printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) "); //USER can add new DO block if type 'a' or move the block by 'm' or delete by 'd'
+	fgets(op, 19, stdin);
+	
 
 			if (op[0] == 'a') {
 				
@@ -530,7 +526,6 @@ struct winsize w;
 				request = PROJW_REQUEST;
 								
 				
-				op[0]='r';
 			}
 			else if (op[0] == 'd') {
 				//clrscr();
@@ -556,7 +551,6 @@ struct winsize w;
 				//readPROJ(sock_fpi);
 				//read_USER(sock_fpo, sock_fpi);
 
-				op[0]='r';
 			}
 			else if (op[0] == 'm') {
 				//clrscr();
@@ -574,7 +568,6 @@ struct winsize w;
 					writePROJ(sock_fpo, PROJindex);
 				}
 				//PROJ[PROJindex].changed==1
-				op[0]='r';
 			}
 			else if (op[0] == 'q') {
 				clrscr();
@@ -604,6 +597,8 @@ void* Reading_data(void* fp) {
 			pthread_mutex_lock(&PROJ_lock);
 			readPROJ(sock_fpi);
 			pthread_mutex_unlock(&PROJ_lock);
+			clrscr();
+
 		}
 		else if (request == EXIT_REQUEST) //when user want to quit, the server give EXIT_REQUEST to client to stop this thread function
 			break;
