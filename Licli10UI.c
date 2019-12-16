@@ -505,9 +505,7 @@ struct winsize w;
 				lt=1;
 				fwrite(&PROJindex, sizeof(int), 1, sock_fpo);
 				writePROJ(sock_fpo, PROJindex);
-				request = PROJW_REQUEST;
-								
-				
+				request = PROJW_REQUEST;			
 			}
 			else if (op[0] == 'd') {
 				//clrscr();
@@ -554,10 +552,6 @@ struct winsize w;
 				break;
 			} //if user type 'q', go back to PROJECT select screen
 			else if(op[0]=='r'){}
-			if(PROJ[PROJindex].changed==1){
-				clrscr();
-				PROJ[PROJindex].changed=0;
-			}
 			}
 		}
 		//if USER quit the program, Change user status from online to offline
