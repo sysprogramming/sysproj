@@ -337,6 +337,7 @@ void sighandler(int sig_num)
 
 	gotoxy(0,w.ws_col );
 	printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) "); //USER can add new DO block if type 'a' or move the block by 'm' or delete by 'd'
+	while (getchar() != '\n');
 	fgets(op, 19, stdin);
 	
 } 
