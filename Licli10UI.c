@@ -326,9 +326,7 @@ void* readdata(void*);
 char op[20];
 void sighandler(int sig_num) 
 { 	
-	changestatus(sock_fpo, userindex);
-	fclose(sock_fpo);
-	fclose(sock_fpi);
+
 } 
 int main(int ac, char* av[]) {
 	void* Reading_data(void*);
