@@ -435,7 +435,6 @@ gotoxy(LOGIX-30,20 );
 		}
 		
 		while (1) {
-clrscr();
 			PROJindex = -1;
 		// After Login, User can see PROJECT LIST and can select the project by type their number	
 		show_project();
@@ -471,14 +470,13 @@ clrscr();
 			fwrite(&request, sizeof(int), 1, sock_fpo);
 			fwrite(&PROJindex, sizeof(int), 1, sock_fpo);
 			writePROJ(sock_fpo, PROJindex);
-clrscr();
 		}
 struct winsize w;
 			ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 			cursor = w.ws_col;
+			clrscr();
 		while (1) {
 			op[0] = 'A';
-			clrscr();
 			show_ONLINEUSER();
 			show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
 			show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
