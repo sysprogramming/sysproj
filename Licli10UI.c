@@ -328,6 +328,7 @@ void sighandler(int sig_num)
 { 	
 
 } 
+int cursor;
 int main(int ac, char* av[]) {
 	void* Reading_data(void*);
 	pthread_t Rth;
@@ -429,7 +430,6 @@ gotoxy(LOGIX-30,20 );
 			else if (request == 3) {
 				PROJindex=6;
 				goto lb;
-
 			}
 			clrscr();
 		}
@@ -474,6 +474,7 @@ clrscr();
 		}
 struct winsize w;
 			ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+			cursor = w.ws_col;
 		while (1) {
 			op[0] = 'A';
 			clrscr();
@@ -582,7 +583,7 @@ void* Reading_data(void* fp) {
 				show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
 				show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
 				show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
-				gotoxy(0, w.ws_col);
+				gotoxy(0, cursor);
 				printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) ");
 			}
 		}
@@ -593,13 +594,13 @@ void* Reading_data(void* fp) {
 			fread(&USERSIZE, sizeof(int), 1, sock_fpi);
 			fread(USERLIST, sizeof(USERINFO), 200, sock_fpi);
 			pthread_mutex_unlock(&PROJ_lock);
-			if (p[0] == 'A') {
+			if (op[0] == 'A') {
 				clrscr();
 				show_ONLINEUSER();
 				show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
 				show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
 				show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
-				gotoxy(0, w.ws_col);
+				gotoxy(0, cursor);
 				printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) ");
 			}
 		}
