@@ -58,10 +58,8 @@ typedef struct TASK_BLOCK {
 typedef struct PROJECT {
 	char title[TL];
 	TASK_BLOCK ARR[3][30];
-
 	int SIZE[3];
-
-
+int status;
 }PROJECT;
 PROJECT PROJ[5] = { 0 };
 USERINFO USERLIST[200] = { 0 };

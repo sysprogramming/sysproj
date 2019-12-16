@@ -165,7 +165,7 @@ void show_project() {
 		gotoxy(PROJI, yindex++);
 		printf("----------------------------------------------------------------------------------------------");
 		gotoxy(PROJI, yindex++);
-		printf("| Project %d : %-50s         |",i+1, PROJ[i].title);
+		printf("| Project %d : %-50s         ",i+1, PROJ[i].title);
 		gotoxy(PROJI, yindex++);
 		gotoxy(MENUI + 12, yindex);
 		gotoxy(PROJI, yindex++);
@@ -267,13 +267,14 @@ void Login(int *USERINDEX,FILE* sock_fpo) {
 		clrscr();
 	}
 }
-void add_PROJ(int index) { //add PROJECT function!
-	clrscr();
-	gotoxy(LOGIX, LOGIY);
+void add_PROJ() { //add PROJECT function!
+clrscr();
+while(getchar()!='\n');
+gotoxy(LOGIX, LOGIY);
 	printf("Type PROJECT NAME! ");
-	fgets(PROJ[index].title, TL, 0);
-	PROJ[index].title[strlen(PROJ[index].title) - 1] = '\0';
-	PROJ[index].status = PROJ_AV;
+	fgets(PROJ[PROJindex].title, TL, stdin);
+	PROJ[PROJindex].title[strlen(PROJ[PROJindex].title) - 1] = '\0';
+	PROJ[PROJindex].status = PROJ_AV;
 }
 
 void* readdata(void*);
@@ -354,7 +355,7 @@ int main(int ac, char* av[]) {
 		
 			scanf("%d", &PROJindex);
 			gotoxy(PROJI, 2);
-			if (PROJindex < 1 && PROJindex>6) {
+			if (PROJindex < 1 || PROJindex>6) {
 				printf("Wrong position! type again");
 				clrscr();
 				sleep(1);
@@ -373,15 +374,14 @@ clrscr();
 			break;
 		}
 		clrscr();
-		PROJindex -= 1;
+		PROJindex = PROJindex-1;
 		if (PROJ[PROJindex].status == PROJ_NOTAV) {
-			add_PROJ(PROJindex);
+			add_PROJ();
 			request = PROJR_REQUEST;
 			fwrite(&request, sizeof(int), 1, sock_fpo);
-			//readPROJ(sock_fpi);
-			//read_USER(sock_fpo, sock_fpi);
 			fwrite(&PROJindex, sizeof(int), 1, sock_fpo);
 			writePROJ(sock_fpo, PROJindex);
+clrscr();
 		}
 		while (1) {
 			//When USER select the project, program print the TASK BLOCKS in PROJECT
