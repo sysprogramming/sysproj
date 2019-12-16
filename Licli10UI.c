@@ -328,18 +328,17 @@ void sighandler(int sig_num)
 { 
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-
-	
+	clrscr();
+	show_ONLINEUSER();
+	show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
+	show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
+	show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
 
 
 	gotoxy(0,w.ws_col );
 	printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) "); //USER can add new DO block if type 'a' or move the block by 'm' or delete by 'd'
 	fgets(op, 19, stdin);
-	clrscr();
-	show_ONLINEUSER();
-			show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
-			show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
-			show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
+	
 } 
 int main(int ac, char* av[]) {
 	void* Reading_data(void*);
@@ -490,6 +489,7 @@ clrscr();
 struct winsize w;
 			ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		while (1) {
+			sleep(1);
 			//When USER select the project, program print the TASK BLOCKS in PROJECT
 			//request = PROJW_REQUEST;
 			//pthread_create(&Rth,NULL,Reading_data,(void*)sock_fpi); // Create new thread do the Reading_data function
