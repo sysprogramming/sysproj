@@ -271,7 +271,7 @@ void add_PROJ(int index) { //add PROJECT function!
 	clrscr();
 	gotoxy(LOGIX, LOGIY);
 	printf("Type PROJECT NAME! ");
-	fgets(PROJ[index].title, sizeof(char) * (TL - 1), 0);
+	fgets(PROJ[index].title, TL, 0);
 	PROJ[index].title[strlen(PROJ[index].title) - 1] = '\0';
 	PROJ[index].status = PROJ_AV;
 }
