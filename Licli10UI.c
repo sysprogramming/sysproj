@@ -378,7 +378,6 @@ int main(int ac, char* av[]) {
 	int ext=0;
 	while(1){  /*USER must Login or register new account to start the LiRello*/
 		while (userindex == -1) {
-			PROJindex = -2;
 int banx=LOGIX-45,bany=0,banx2=5;
 gotoxy(banx, bany+5);
 printf(" __     __     ______     __         ______     ______     __    __     ______\n");      
@@ -476,8 +475,8 @@ clrscr();
 struct winsize w;
 			ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		while (1) {
-
-			PRINTBLOCK:clrscr();
+			op[0] = 'A';
+			clrscr();
 			show_ONLINEUSER();
 			show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
 			show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
@@ -577,7 +576,15 @@ void* Reading_data(void* fp) {
 			pthread_mutex_lock(&PROJ_lock);
 			readPROJ(sock_fpi);
 			pthread_mutex_unlock(&PROJ_lock);
-			if (PROJindex == -1) { goto PRINTBLOCK; }
+			if (op[0] == 'A') {
+				clrscr();
+				show_ONLINEUSER();
+				show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
+				show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
+				show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
+				gotoxy(0, w.ws_col);
+				printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) ");
+			}
 		}
 		else if (request == EXIT_REQUEST) //when user want to quit, the server give EXIT_REQUEST to client to stop this thread function
 			break;
@@ -586,6 +593,15 @@ void* Reading_data(void* fp) {
 			fread(&USERSIZE, sizeof(int), 1, sock_fpi);
 			fread(USERLIST, sizeof(USERINFO), 200, sock_fpi);
 			pthread_mutex_unlock(&PROJ_lock);
+			if (p[0] == 'A') {
+				clrscr();
+				show_ONLINEUSER();
+				show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
+				show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
+				show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
+				gotoxy(0, w.ws_col);
+				printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) ");
+			}
 		}
 	}
 	return NULL;
