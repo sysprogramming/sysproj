@@ -325,18 +325,10 @@ gotoxy(LOGIX, LOGIY);
 void* readdata(void*);
 char op[20];
 void sighandler(int sig_num) 
-{ 
-	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	clrscr();
-	show_ONLINEUSER();
-	show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
-	show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
-	show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
-
-
-	
-	
+{ 	
+	changestatus(sock_fpo, userindex);
+	fclose(sock_fpo);
+	fclose(sock_fpi);
 } 
 int main(int ac, char* av[]) {
 	void* Reading_data(void*);
@@ -384,9 +376,6 @@ int main(int ac, char* av[]) {
 	
 	pthread_create(&Rth,NULL,Reading_data,(void*)sock_fpi); // Create new thread do the Reading_data function
 
-	//pthread_create(&Rth,NULL,readdata,NULL); // Create new thread do the Reading_data function
-
-	//pthread_create(&Rth,NULL,readdata,NULL); // Create new thread do the Reading_data function
 	signal(SIGTSTP, sighandler); 
 	int ext=0;
 	while(1){  /*USER must Login or register new account to start the LiRello*/
@@ -488,14 +477,6 @@ struct winsize w;
 			ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		while (1) {
 			
-			//When USER select the project, program print the TASK BLOCKS in PROJECT
-			//request = PROJW_REQUEST;
-			//pthread_create(&Rth,NULL,Reading_data,(void*)sock_fpi); // Create new thread do the Reading_data function
-			
-			//fwrite(&request, sizeof(int), 1, sock_fpo);
-			//fflush(sock_fpo);
-			//readPROJ(sock_fpi);
-			//read_USER(sock_fpo, sock_fpi);
 			show_ONLINEUSER();
 			show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
 			show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
@@ -509,10 +490,10 @@ struct winsize w;
 				
 				clrscr();
 				gotoxy(MENUI, 12);
-				printf("ENTER TITLE: of your block");
+				printf("ENTER TITLE: ");
 				fgets(title, TL, stdin); 
 				gotoxy(MENUI, 13);
-				printf("ENTER CONTENTS:");
+				printf("ENTER CONTENTS: ");
 				fgets(content, CL, stdin);
 				title[strlen(title) - 1] = '\0';
 				content[strlen(content) - 1] = '\0';
@@ -540,16 +521,14 @@ struct winsize w;
 					delete_block(PROJ[PROJindex].ARR[x - 1], y - 1, PROJ[PROJindex].SIZE[x - 1]--);
 					request = PROJR_REQUEST;
 					fwrite(&request, sizeof(int), 1, sock_fpo);
-					//readPROJ(sock_fpi);
-					//read_USER(sock_fpo, sock_fpi);
+					
 					fwrite(&PROJindex, sizeof(int), 1, sock_fpo);
 					writePROJ(sock_fpo, PROJindex);
 				}
 				request = PROJW_REQUEST;
 				fwrite(&request, sizeof(int), 1, sock_fpo);
 				fflush(sock_fpo);
-				//readPROJ(sock_fpi);
-				//read_USER(sock_fpo, sock_fpi);
+				
 
 			}
 			else if (op[0] == 'm') {
@@ -567,7 +546,7 @@ struct winsize w;
 					fwrite(&PROJindex, sizeof(int), 1, sock_fpo);
 					writePROJ(sock_fpo, PROJindex);
 				}
-				//PROJ[PROJindex].changed==1
+				
 			}
 			else if (op[0] == 'q') {
 				clrscr();
@@ -597,7 +576,6 @@ void* Reading_data(void* fp) {
 			pthread_mutex_lock(&PROJ_lock);
 			readPROJ(sock_fpi);
 			pthread_mutex_unlock(&PROJ_lock);
-			clrscr();
 
 		}
 		else if (request == EXIT_REQUEST) //when user want to quit, the server give EXIT_REQUEST to client to stop this thread function
