@@ -139,9 +139,9 @@ char numstring[20] = { '\0' };
 char savestring[20] = { '\0' };
 void QUIT_SERVER(int num) {
 	FILE* usero, * numo, * saveo;
-	saveo = fopen(userstring, "w");
-	usero = fopen(numstring, "w");
-	numo = fopen(savestring, "w");
+	saveo = fopen(savestring, "w");
+	usero = fopen(userstring, "w");
+	numo = fopen(numstring, "w");
 
 	save_bfile(saveo);
 	save_num(numo);
@@ -150,6 +150,7 @@ void QUIT_SERVER(int num) {
 	fclose(usero);
 	fclose(numo);
 	close(sock_id);
+	exit(1);
 }
 
 int main(int ac, char* av[]) {
