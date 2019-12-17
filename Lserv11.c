@@ -72,50 +72,49 @@ void * handle_clnt(void *arg);
 void Register() {}           //Register
 void Login() {}              //Login
 void show_screen() {}        //print function
-void add_project() {}
-void delete_project() {}
-void save_bfile(FILE* fp){
+
+void save_bfile(FILE* fp){ //save PROJECT data as a file
 printf("saving binary file start\n");
 for(int i=0;i<5;i++)
 fwrite(&PROJ[i],sizeof(PROJECT),1,fp);
 fflush(fp);
 }
-void read_bfile(FILE *fp){
+void read_bfile(FILE *fp){ //read PROJECT data from a file 
 printf("reading binary file start\n");
 for(int i=0;i<5;i++)
 fread(&PROJ[i],sizeof(PROJECT),1,fp);
 }
-void read_USER(FILE* fp) {
+void read_USER(FILE* fp) {  //read USER data from a file
 	printf("reading user file start\n");
 	fread(USERLIST, sizeof(USERINFO), 200, fp);
 }
-void save_USER(FILE* fp) {
+void save_USER(FILE* fp) {  //save USER data as a file
 	printf("saving user file start\n");
 	fwrite(USERLIST, sizeof(USERINFO), 200, fp);
 	fflush(fp);
 }
-void writePROJ(FILE* sock_fpo) {
+void writePROJ(FILE* sock_fpo) { //send PROJECT data to client
 	for (int i = 0; i < 5; i++) {
 		printf("write the project to client\n");
 		fwrite(&PROJ[i], sizeof(PROJECT), 1, sock_fpo);
 	}
 	fflush(sock_fpo);
 }
-void save_num(FILE* fp) {
+void save_num(FILE* fp) { //save USERSIZE as a file
 	fwrite(&USERSIZE, sizeof(int), 1, fp);
 	fflush(fp);
 }
-void read_num(FILE* fp) {
+void read_num(FILE* fp) { //read USERSIZE from a file
 	fread(&USERSIZE, sizeof(int), 1, fp);
 }
 
-void readPROJ(FILE* sock_fpi) {
+void readPROJ(FILE* sock_fpi) { //get modified PROJECT data from client
 	int proj_index;
 	printf("read operation start\n");
 	fread(&proj_index, sizeof(int), 1, sock_fpi);
 	fread(&PROJ[proj_index], sizeof(PROJECT), 1, sock_fpi);
 }
-void writeUSER(FILE* sock_fpo) {
+void writeUSER(FILE* sock_fpo) { //send modified PROJECT data to client
 	printf("write USERLIST\n");
 	fwrite(&USERSIZE, sizeof(int), 1, sock_fpo);
 	fflush(sock_fpo);
@@ -123,21 +122,21 @@ void writeUSER(FILE* sock_fpo) {
 	fwrite(&USERLIST[i], sizeof(USERINFO), 1, sock_fpo);
 	fflush(sock_fpo);
 }
-void readUSER(FILE* sock_fpi) {
+void readUSER(FILE* sock_fpi) { //get modified USER data from client
 	printf("read USER\n");
 	fread(&USERLIST[USERSIZE++], sizeof(USERINFO), 1, sock_fpi);
 }
 
-int clnt_cnt =0;
-int clnt_socks[256];
-FILE* sock_fpo[256];
-FILE* sock_fpi[256];
+int clnt_cnt =0;  //connected client size
+int clnt_socks[256];//array save the connected client
+FILE* sock_fpo[256];//FILE pointer array to send DATA to all clinet
+FILE* sock_fpi[256];//FILE pointer array to get DATA from all client
 int sock_id;
 pthread_mutex_t mutx;
 char userstring[20] = { '\0' };
 char numstring[20] = { '\0' };
 char savestring[20] = { '\0' };
-void QUIT_SERVER(int num) {
+void QUIT_SERVER(int num) { // when user give SIGINT, server save the data and quit
 	FILE* usero, * numo, * saveo;
 	saveo = fopen(savestring, "w");
 	usero = fopen(userstring, "w");
@@ -173,23 +172,7 @@ int main(int ac, char* av[]) {
    	 }
 	
 	printf("#%s--",av[1]);
-	/*int portlist[30];
-int i=0;
-	if (rooms = fopen("rooms.txt", "r")) {
-                                while (fscanf(rooms, "%d", &portlist[i]) != EOF) {
-                                        i++;
-                                }
-                                fclose(rooms);
-                        }
-
-	for(int i=0;i<30;i++){
-		if(atoi(av[i])==portlist[i]){
-			printf("Project")
-		}
-	}
-	rooms = fopen("rooms.txt", "a");
-	fprintf(rooms,"%s\n",av[1]);
-	fclose(rooms);*/
+	//first, server open the file and read data from file
 	char* port = av[1];
 	snprintf(userstring,sizeof(userstring),"%s-user.txt",(av[1]));
 	snprintf(numstring,sizeof(numstring),"%s-num.txt",(av[1]));
@@ -225,7 +208,7 @@ int i=0;
 		oops("listen");
 
 	
-	while(1){
+	while(1){ //server continue to get new client
 	
 		clnt_adr_sz=sizeof(clnt_adr);
 		sock_fd = accept(sock_id, (struct sockaddr*)&clnt_adr,&clnt_adr_sz);
@@ -274,10 +257,10 @@ void client_request_processing(int index){
 	sock_fpo[index] = fdopen(clnt_socks[index], "w");//open FILE stream between server and client
 	if (sock_fpi[index] == NULL||sock_fpo[index]==NULL)
 		oops("fdopen");
-	while (request!=EXIT_REQUEST) { 
+	while (request!=EXIT_REQUEST) { //while client send EXIT_REQUEST, break the while loop and close the client 
 		printf("Receive request from client \n");
 		fread(&request, sizeof(int), 1, sock_fpi[index]);
-		if (request == PROJR_REQUEST) {
+		if (request == PROJR_REQUEST) { //when client give PROJR_REQUEST, server get modified data and give it back to all client
 			printf("Request is PROJR\n");
 			readPROJ(sock_fpi[index]);
 			request = PROJR_REQUEST;
@@ -293,17 +276,17 @@ void client_request_processing(int index){
 			pthread_mutex_unlock(&mutx);
 
 		}
-		else if (request == PROJW_REQUEST) {
+		else if (request == PROJW_REQUEST) { //when client first start, it read the data from server by give PROW_REQUEST to server
 			printf("Request is PROJW\n");
 			writePROJ(sock_fpo[index]);
 		}
-		else if(request==EXIT_REQUEST){
+		else if(request==EXIT_REQUEST){ //when client give EXIT_REQUEST, server give it too to client multi-thread to quit thread
 			printf("Request is EXIT\n");
 			fwrite(&request, sizeof(int), 1, sock_fpo[index]);
 			fflush(sock_fpo[index]);
 			break;
 		}
-		else if (request == USERR_REQUEST) {
+		else if (request == USERR_REQUEST) { //same as PROJR
 			printf("Request is USERR\n");
 			readUSER(sock_fpi[index]);
 			printf("Current USERSIZE is%d\n", USERSIZE);
@@ -316,11 +299,11 @@ void client_request_processing(int index){
 				}
 			}
 		}
-		else if (request == USERW_REQUEST) {
+		else if (request == USERW_REQUEST) {//same as PROJW
 			printf("Request is USERW\n");
 			writeUSER(sock_fpo[index]);
 		}
-		else if (request == CHANGE_STATUS) {
+		else if (request == CHANGE_STATUS) {//when someone Login, change status to online, or offline when log-off 
 			printf("Request is change status\n");
 			fread(&userindex, sizeof(int), 1, sock_fpi[index]);
 			USERLIST[userindex].status = !USERLIST[userindex].status;

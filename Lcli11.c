@@ -46,15 +46,14 @@
 #define PROJ_AV 1
 #define PROJ_NOTAV 0
 pthread_mutex_t PROJ_lock = PTHREAD_MUTEX_INITIALIZER;
-
+int PROJindex = -1; // PROJECT index user select
+int USERSIZE = 0; //current USERSIZE
 void clrscr(void)   //function that clear the screen
 {
 	write(1, "\033[1;1H\033[2J", 10);
 }
 
-int PROJnum = 0;
-int PROJindex = -1;
-int USERSIZE=0;
+
 void gotoxy(int x, int y)  //function that move the cursor position
 {
 	printf("%c[%d;%df", 0x1B, y, x);
@@ -259,7 +258,7 @@ void changestatus(FILE* sock_fpo, int index) {
 /* At the start of client program, USER must Login with existing ID and PW. if USER dont have account
 user must Register new account*/
 int lt=0;
-void Login(int *USERINDEX,FILE* sock_fpo) {
+void Login(int *USERINDEX,FILE* sock_fpo) { //If Login Success, change the USER`s status to ONLINE and give this data to server
 	char ID[IDL];
 	char PW[PWL];
 	int yindex;
@@ -441,13 +440,10 @@ printf("    \\/_/   \\/_____/      \\/_____/   \\/_/   \\/_/ /_/   \\/_____/   \
 gotoxy(LOGIX-30,20 );
 			  printf("Collaborate with your friends for your Cool Linux Projects!");                                                                                              
 
-			
-			//gotoxy(LOGIX, LOGIY);
-			//printf("WELCOME TO LIRELLO!!!");
 			gotoxy(LOGIX-35, LOGIY);
 			printf("+---------------------------------------------------------------+");
 			gotoxy(LOGIX-35, LOGIY+1);
-			printf(" If you want to |Login, type 1|, or |2 to Register| |3 to exit|"); //if USER type 200, goto Login screen, 300 to Register screen
+			printf(" If you want to |Login, type 1|, or |2 to Register| |3 to exit|"); //if USER type 1, goto Login screen, 2 to Register screen 3 to quit client
 			gotoxy(LOGIX-35, LOGIY + 4);
 			printf("+--------------------------------------------------------------+");
 			gotoxy(LOGIX-5, LOGIY + 3);
@@ -455,7 +451,6 @@ gotoxy(LOGIX-30,20 );
 			
 			if (request == LOGIN_REQUEST) {
 				Login(&userindex,sock_fpo);
-				 //If Login Success, change the USER`s status to ONLINE and give this data to server
 			}
 			else if (request == REGISTER_REQUEST) { 
 				Register(&userbuf);
@@ -498,7 +493,7 @@ clrscr();
 		}
 		clrscr();
 		PROJindex = PROJindex-1;
-		if (PROJ[PROJindex].status == PROJ_NOTAV) {
+		if (PROJ[PROJindex].status == PROJ_NOTAV) { //if PROJECT selected first time, user should set the project name and send the modified data
 			add_PROJ();
 			request = PROJR_REQUEST;
 			fwrite(&request, sizeof(int), 1, sock_fpo);
@@ -511,10 +506,8 @@ struct winsize w;
 		int tp=0;
 clrscr();
 	char c;
-		//	for(int menur=MENUI-3;menur<w.ws_row;menur++)		
-		
-		while (1) {
-			//clrscr();
+				
+		while (1) { // if project selected, enter this loop and get operation code by user, do a proper action
 			if(tp==0){
 			op[0] = 'A';
 			gotoxy(MENUI-4,12);
@@ -539,15 +532,11 @@ clrscr();
 			gotoxy(MENUI, 34);
 			printf("+-------------------------------------------------------+");
 			}
-	/*gotoxy(0, 50);
-	printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) "); //USER can add new DO block if type 'a' or move the block by 'm' or delete by 'd'
-	fgets(op, 19, stdin);
-	*/		int kbi=kbhit();
+			int kbi=kbhit();
 			if(kbi){
 				c=fgetc(stdin);			
 				if (c == 'a') {
-					
-					//clrscr();
+				//if user add new task block,client give server modified data, and server give it back to all user connected
 					gotoxy(MENUI, 38);
 					printf("+--! Add new block:  ------------------------------++");
 					gotoxy(MENUI, 39);
@@ -575,7 +564,7 @@ clrscr();
 					request = PROJW_REQUEST;			
 				}
 				else if (c == 'd') {
-					//clrscr();
+					//if user delete task block,client give server modified data, and server give it back to all user connected
 					gotoxy(MENUI,38 );
 					printf("!! Type the position you want to delete(x y):");
 					scanf("%d %d", &x, &y);
@@ -598,7 +587,7 @@ clrscr();
 
 				}
 				else if (c == 'm') {
-					//clrscr();
+					//if user move task block,client give server modified data, and server give it back to all user connected
 					gotoxy(MENUI,38 );
 					printf("!! Type the position you want to move(x y):");
 					scanf("%d %d", &x, &y);
@@ -643,35 +632,17 @@ void* Reading_data(void* fp) {
 
 	while (request != EXIT_REQUEST) {
 		fread(&request, sizeof(int), 1, sock_fpi);
-		if (request == PROJR_REQUEST) {
+		if (request == PROJR_REQUEST) { //when server send PROJR_REQUEST to client, client should read PROJECT data
 			pthread_mutex_lock(&PROJ_lock);
 			readPROJ(sock_fpi);
-			/*if (op[0] == 'A') {
-				clrscr();
-				show_ONLINEUSER();
-				show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
-				show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
-				show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
-				gotoxy(0, cursor);
-				printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) ");
-			}*/
 			pthread_mutex_unlock(&PROJ_lock);
 		}
 		else if (request == EXIT_REQUEST) //when user want to quit, the server give EXIT_REQUEST to client to stop this thread function
 			break;
-		else if (request == USERR_REQUEST) {
+		else if (request == USERR_REQUEST) {//when server send USERR_REQUEST to client, client should read USER data
 			pthread_mutex_lock(&PROJ_lock);
 			fread(&USERSIZE, sizeof(int), 1, sock_fpi);
 			fread(USERLIST, sizeof(USERINFO), 200, sock_fpi);
-			/*if (op[0] == 'A') {
-				clrscr();
-				show_ONLINEUSER();
-				show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
-				show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
-				show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
-				gotoxy(0, cursor);
-				printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) ");
-			}*/
 			pthread_mutex_unlock(&PROJ_lock);
 			
 		}
