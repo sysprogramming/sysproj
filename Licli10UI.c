@@ -322,6 +322,7 @@ gotoxy(LOGIX, LOGIY);
 	PROJ[PROJindex].status = PROJ_AV;
 }
 int changed = 0;
+int printsection = 0;
 void* readdata(void*);
 char op[20];
 void sighandler(int sig_num) 
@@ -474,6 +475,7 @@ clrscr();
 			writePROJ(sock_fpo, PROJindex);
 		}
 struct winsize w;
+cursor = w.ws_col;
 			ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 			clrscr();
 			show_ONLINEUSER();
@@ -483,6 +485,7 @@ struct winsize w;
 			gotoxy(0, w.ws_col);
 			printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) ");
 		while (1) {
+			printsection = 1;
 	fgets(op, 19, stdin);
 			if (op[0] == 'a') {
 				
@@ -546,6 +549,7 @@ struct winsize w;
 			}
 			else if (op[0] == 'q') {
 				clrscr();
+				printsection = 0;
 				break;
 			} //if user type 'q', go back to PROJECT select screen
 			else if(op[0]=='r'){}
@@ -584,7 +588,7 @@ void* Reading_data(void* fp) {
 }
 void* ONLY_PRINT(void* useless) {
 	while (1){
-	if (changed == 1) {
+	if (changed == 1&printsection==1) {
 		clrscr();
 		show_ONLINEUSER();
 		show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
