@@ -132,6 +132,7 @@ int clnt_cnt =0;
 int clnt_socks[256];
 FILE* sock_fpo[256];
 FILE* sock_fpi[256];
+int sock_id;
 pthread_mutex_t mutx;
 char userstring[20] = { '\0' };
 char numstring[20] = { '\0' };
@@ -150,7 +151,7 @@ void QUIT_SERVER(int num) {
 	fclose(numo);
 	close(sock_id);
 }
-int sock_id
+
 int main(int ac, char* av[]) {
 
 	struct sockaddr_in saddr,clnt_adr;
