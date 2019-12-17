@@ -327,6 +327,7 @@ gotoxy(LOGIX, LOGIY);
 void* readdata(void*);
 char op[20];
 FILE* sock_fpo, * sock_fpi;
+int userindex = -1;
 void sighandler(int sig_num) 
 { 	
 	changestatus(sock_fpo, userindex);
@@ -377,7 +378,6 @@ int main(int ac, char* av[]) {
 	int request;
 	char title[TL];
 	char content[CL];
-	int userindex = -1;
 	USERINFO userbuf;
 	sock_id = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock_id == -1)
