@@ -133,6 +133,24 @@ int clnt_socks[256];
 FILE* sock_fpo[256];
 FILE* sock_fpi[256];
 pthread_mutex_t mutx;
+char userstring[20] = { '\0' };
+char numstring[20] = { '\0' };
+char savestring[20] = { '\0' };
+void QUIT_SERVER(int num) {
+	FILE* usero, * numo, * saveo;
+	saveo = fopen(userstring, "w");
+	usero = fopen(numstring, "w");
+	numo = fopen(savestring, "w");
+
+	save_bfile(saveo);
+	save_num(numo);
+	save_USER(usero);
+	fclose(saveo);
+	fclose(usero);
+	fclose(numo);
+	close(sock_id);
+}
+int sock_id
 int main(int ac, char* av[]) {
 
 	struct sockaddr_in saddr,clnt_adr;
@@ -140,7 +158,7 @@ int main(int ac, char* av[]) {
 	FILE* usero, * useri, * numi, * numo, * saveo, * savei,* rooms;;
 	char hostname[HOSTLEN];
 	char op[BUFSIZ];
-	int sock_id, sock_fd;
+	, sock_fd;
 	time_t thetime;
 	char* ctime();
 	int clnt_adr_sz;
@@ -171,9 +189,6 @@ int i=0;
 	fprintf(rooms,"%s\n",av[1]);
 	fclose(rooms);*/
 	char* port = av[1];
-	char userstring[20]={'\0'};
-	char numstring[20]={'\0'};
-	char savestring[20]={'\0'};
 	snprintf(userstring,sizeof(userstring),"%s-user.txt",(av[1]));
 	snprintf(numstring,sizeof(numstring),"%s-num.txt",(av[1]));
 	snprintf(savestring,sizeof(savestring),"%s-save.txt",(av[1]));
@@ -192,7 +207,8 @@ int i=0;
 	sock_id = socket(PF_INET, SOCK_STREAM, 0);
 	if (sock_id == -1)
 		oops("socket");
-
+	signal(SIGSTP, QUIT_SERVER);
+	signal(SIGINT,QUIT_SERVER)
 	bzero((void*)& saddr, sizeof(saddr));
 	gethostname(hostname, HOSTLEN);
 	hp = gethostbyname(hostname);
@@ -228,21 +244,7 @@ int i=0;
 
 		
 	}
-	close(sock_id);
-	saveo = fopen(userstring, "w");
-	usero = fopen(numstring, "w");
-	numo = fopen(savestring, "w");
-
-	save_bfile(saveo);
-	save_num(numo);
-	save_USER(usero);
-	fclose(saveo);
-	fclose(usero);
-	fclose(numo);
-
-
     return 0;	
-
 }
 
 void *handle_clnt(void * arg){
