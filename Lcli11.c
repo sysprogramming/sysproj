@@ -333,6 +333,7 @@ void sighandler(int sig_num)
 	changestatus(sock_fpo, userindex);
 	fclose(sock_fpo);
 	fclose(sock_fpi);
+	exit(1);
 } 
 int cursor;
 int kbhit(void)
