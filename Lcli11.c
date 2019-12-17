@@ -326,9 +326,12 @@ gotoxy(LOGIX, LOGIY);
 
 void* readdata(void*);
 char op[20];
+FILE* sock_fpo, * sock_fpi;
 void sighandler(int sig_num) 
 { 	
-
+	changestatus(sock_fpo, userindex);
+	fclose(sock_fpo);
+	fclose(sock_fpi);
 } 
 int cursor;
 int kbhit(void)
@@ -371,7 +374,6 @@ int main(int ac, char* av[]) {
         exit(1);
    	 }
 	int x, y;
-	FILE* sock_fpo,*sock_fpi;
 	int request;
 	char title[TL];
 	char content[CL];

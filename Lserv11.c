@@ -159,7 +159,7 @@ int main(int ac, char* av[]) {
 	FILE* usero, * useri, * numi, * numo, * saveo, * savei,* rooms;;
 	char hostname[HOSTLEN];
 	char op[BUFSIZ];
-	, sock_fd;
+	int sock_fd;
 	time_t thetime;
 	char* ctime();
 	int clnt_adr_sz;
@@ -208,8 +208,8 @@ int i=0;
 	sock_id = socket(PF_INET, SOCK_STREAM, 0);
 	if (sock_id == -1)
 		oops("socket");
-	signal(SIGSTP, QUIT_SERVER);
-	signal(SIGINT,QUIT_SERVER)
+	signal(SIGTSTP, QUIT_SERVER);
+	signal(SIGINT, QUIT_SERVER);
 	bzero((void*)& saddr, sizeof(saddr));
 	gethostname(hostname, HOSTLEN);
 	hp = gethostbyname(hostname);
