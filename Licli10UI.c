@@ -321,7 +321,7 @@ gotoxy(LOGIX, LOGIY);
 	PROJ[PROJindex].title[strlen(PROJ[PROJindex].title) - 1] = '\0';
 	PROJ[PROJindex].status = PROJ_AV;
 }
-
+int changed = 0;
 void* readdata(void*);
 char op[20];
 void sighandler(int sig_num) 
@@ -331,7 +331,9 @@ void sighandler(int sig_num)
 int cursor;
 int main(int ac, char* av[]) {
 	void* Reading_data(void*);
+	void* ONLY_PRINT(void*);
 	pthread_t Rth;
+	pthread_t Prt;
 	struct sockaddr_in servadd;
 	struct hostent* hp;
 	int length;
@@ -374,7 +376,7 @@ int main(int ac, char* av[]) {
 	read_USER(sock_fpo, sock_fpi);
 	
 	pthread_create(&Rth,NULL,Reading_data,(void*)sock_fpi); // Create new thread do the Reading_data function
-
+	pthread_create(&Prt, NULL, ONLY_PRINT, (void*)NULL);
 	signal(SIGTSTP, sighandler); 
 	int ext=0;
 	while(1){  /*USER must Login or register new account to start the LiRello*/
@@ -473,19 +475,15 @@ clrscr();
 		}
 struct winsize w;
 			ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-			cursor = w.ws_col;
-		while (1) {
 			clrscr();
-			op[0] = 'A';
 			show_ONLINEUSER();
 			show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
 			show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
-			show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);		
-	gotoxy(0, w.ws_col);
-	printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) "); //USER can add new DO block if type 'a' or move the block by 'm' or delete by 'd'
+			show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
+			gotoxy(0, w.ws_col);
+			printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) ");
+		while (1) {
 	fgets(op, 19, stdin);
-	
-
 			if (op[0] == 'a') {
 				
 				clrscr();
@@ -569,16 +567,8 @@ void* Reading_data(void* fp) {
 		if (request == PROJR_REQUEST) {
 			pthread_mutex_lock(&PROJ_lock);
 			readPROJ(sock_fpi);
-			/*if (op[0] == 'A') {
-				clrscr();
-				show_ONLINEUSER();
-				show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
-				show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
-				show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
-				gotoxy(0, cursor);
-				printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) ");
-			}*/
 			pthread_mutex_unlock(&PROJ_lock);
+			changed = 1;
 		}
 		else if (request == EXIT_REQUEST) //when user want to quit, the server give EXIT_REQUEST to client to stop this thread function
 			break;
@@ -586,18 +576,24 @@ void* Reading_data(void* fp) {
 			pthread_mutex_lock(&PROJ_lock);
 			fread(&USERSIZE, sizeof(int), 1, sock_fpi);
 			fread(USERLIST, sizeof(USERINFO), 200, sock_fpi);
-			/*if (op[0] == 'A') {
-				clrscr();
-				show_ONLINEUSER();
-				show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
-				show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
-				show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
-				gotoxy(0, cursor);
-				printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) ");
-			}*/
 			pthread_mutex_unlock(&PROJ_lock);
-			
+			changed = 1;
 		}
 	}
 	return NULL;
+}
+void* ONLY_PRINT(void* useless) {
+	while (1){
+	if (changed == 1) {
+		clrscr();
+		show_ONLINEUSER();
+		show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
+		show_block(PROJ[PROJindex].ARR[1], PROJ[PROJindex].SIZE[1], DOINGI);
+		show_block(PROJ[PROJindex].ARR[2], PROJ[PROJindex].SIZE[2], DONEI);
+		gotoxy(0, cursor);
+		printf("Select the operation ('a' to add new block, 'd' to delete block, 'm' to move block, 'q' to go back, 'r' to refresh) ");
+		changed = 0;
+	}
+	sleep(1);
+	}
 }
