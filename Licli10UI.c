@@ -588,7 +588,7 @@ void* Reading_data(void* fp) {
 }
 void* ONLY_PRINT(void* useless) {
 	while (1){
-	if (changed == 1&printsection==1) {
+	if (changed == 1&&printsection==1) {
 		clrscr();
 		show_ONLINEUSER();
 		show_block(PROJ[PROJindex].ARR[0], PROJ[PROJindex].SIZE[0], DOI);
